@@ -19,6 +19,11 @@ public class VentanaBuscaminas extends javax.swing.JFrame {
     int filas = 20;
     int columnas = 30;
     int numMinas = 59;
+    int banderas=0;
+    int banderasMax=numMinas;
+    boolean juega=true;
+    boolean ganado=false;
+    int aciertos=0;
     
     Boton [][] arrayBotones = new Boton[filas][columnas];
 
@@ -28,7 +33,7 @@ public class VentanaBuscaminas extends javax.swing.JFrame {
        int c = r.nextInt(columnas);
        
        arrayBotones[f][c].bomba = 1;
-       arrayBotones[f][c].setText("B");
+       //arrayBotones[f][c].setText("B");
     }
     
     //cuentaminas realiza un paso previo que consiste en contar para cada celda
@@ -49,10 +54,10 @@ public class VentanaBuscaminas extends javax.swing.JFrame {
                 }
                 arrayBotones[i][j].numeroMinasAlrededor = minas;
                 minas = 0;
-                if ((arrayBotones[i][j].numeroMinasAlrededor > 0) &&
+                /*if ((arrayBotones[i][j].numeroMinasAlrededor > 0) &&
                     (arrayBotones[i][j].bomba == 0)){
                     arrayBotones[i][j].setText(String.valueOf(arrayBotones[i][j].numeroMinasAlrededor));
-                }
+                }*/
             }
         }
         
@@ -94,17 +99,39 @@ public class VentanaBuscaminas extends javax.swing.JFrame {
     //este método es llamado cada vez que hacemos clic en un botón
     private void botonPulsado(MouseEvent e){
         Boton miBoton = (Boton) e.getComponent();
+        Boton aux;
+        if(juega && !ganado){
         if(e.getButton() == MouseEvent.BUTTON3){
-            miBoton.setText("?");
+            if(banderas<banderasMax){
+                miBoton.setText("?");
+                banderas++;
+            }
         }
-        else{
+        else if(miBoton.bomba==1){
             //si es una bomba --> explota y se acaba la partida
             
+            for(int i=0;i<filas;i++){
+                for(int j=0;j<columnas;j++){
+                    if(arrayBotones[i][j].bomba==1){
+                        aux=arrayBotones[i][j];
+                        aux.setText("B");
+                    }
+                }
+            }
+            miBoton.setText("X");
+            juega=false;
+        }else{
             //declaro un arraylist para ir guardando la lista de botones
             //que tengo que verificar
             ArrayList <Boton> listaDeCasillasAMirar = new ArrayList();
             //añado el botón que ha sido pulsado
             listaDeCasillasAMirar.add(miBoton);
+            
+            if(miBoton.numeroMinasAlrededor>0){
+                miBoton.setText(Integer.toString(miBoton.numeroMinasAlrededor));
+                miBoton.setEnabled(false);
+            }else{
+                
             
             while (listaDeCasillasAMirar.size() > 0){
                 Boton b = listaDeCasillasAMirar.get(0);
@@ -120,7 +147,15 @@ public class VentanaBuscaminas extends javax.swing.JFrame {
                                if (arrayBotones[b.x + k][b.y + m].numeroMinasAlrededor == 0){
                                    arrayBotones[b.x + k][b.y + m].setEnabled(false);
                                    listaDeCasillasAMirar.add(arrayBotones[b.x + k][b.y + m]);
-                               } 
+                              
+                                   
+                               }else{arrayBotones[b.x + k][b.y + m].setText(Integer.toString(arrayBotones[b.x + k][b.y + m].numeroMinasAlrededor));
+                               arrayBotones[b.x + k][b.y + m].setEnabled(false);}
+                               /*if (arrayBotones[b.x + k][b.y + m].numeroMinasAlrededor > 0 && arrayBotones[b.x + k][b.y + m].bomba!=1){
+                                   arrayBotones[b.x + k][b.y + m].setEnabled(false);
+                                   listaDeCasillasAMirar.add(arrayBotones[b.x + k][b.y + m]);
+                                   arrayBotones[b.x + k][b.y + m].setText(Integer.toString(arrayBotones[b.x + k][b.y + m].numeroMinasAlrededor));
+                               }*/
                             }
                         }    
                     }
@@ -128,8 +163,26 @@ public class VentanaBuscaminas extends javax.swing.JFrame {
                 listaDeCasillasAMirar.remove(b);
             }
             //si no, verificamos la casilla 
-            miBoton.setText("0");
+            
+            }
         }
+        }
+        if(!ganado){
+            for(int i=0;i<filas;i++){
+                for(int j=0;j<columnas;j++){
+                    if(arrayBotones[i][j].bomba==1){
+                        if(arrayBotones[i][j].getText().equals("?")){
+                            aciertos++;
+                        }
+                        if(aciertos==banderasMax){
+                            ganado=true;
+                        }
+                        
+                    }
+                }
+            }
+        }
+        
         
     }
     
